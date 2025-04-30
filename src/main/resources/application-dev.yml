@@ -1,0 +1,15 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: FRIEND_BOOK-APPLICATION
+  datasource:
+    url: jdbc:mysql://localhost:3306/friend_book
+    username: root
+    password: Manish@626474
+  jpa:
+    hibernate:
+      ddl-auto: 'create-drop'
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
