@@ -8,7 +8,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/friend_book
     username: root
-    password: Manish@626474
+    password: Webkorps@123
 
   jpa:
     hibernate:

@@ -77,19 +77,19 @@ public class AuthServiceImpl implements AuthService{
                 .orElseThrow(()-> new UserNotFoundException(String.format("user not found with username : %d and email : %d",username, email)));
 
         String token = jwtService.generatePasswordResetToken(user);
-        String resetLink = "http://localhost:8080/api/v1/auth/reset-password?token=" + token;
+        String resetLink = "http://localhost:8081/api/v1/auth/reset-password?token=" + token;
         return emailService.sendPasswordResetEmail(email,resetLink);
 
     }
 
     @Override
     public void updatePassword(String token, String newPassword) {
-        Map<String ,Object> claims = new HashMap<>();
+        Map<String ,Object> claims = jwtService.getAllClaims(token);
         String username = claims.get("username").toString();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(()-> new UserNotFoundException(String.format("user not found with username : %d ",username)));
 
-        user.setPassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 }

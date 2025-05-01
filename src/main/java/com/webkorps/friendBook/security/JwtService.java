@@ -89,6 +89,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
+
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
@@ -96,6 +97,11 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public Claims getAllClaims(String token)
+    {
+        return extractAllClaims(token);
     }
 
     private Key getSignInKey() {

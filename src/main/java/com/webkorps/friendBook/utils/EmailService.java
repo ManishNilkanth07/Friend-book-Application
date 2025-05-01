@@ -20,7 +20,7 @@ public class EmailService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "utf-8");
 
-        // Set up Thymeleaf context with dynamic content
+
         Context context = new Context();
         context.setVariable("resetLink", resetLink);
 
