@@ -58,9 +58,9 @@ public class UserServiceImpl implements UserService {
         {
             user.setIsPrivate(request.getIsPrivate());
         }
-        if(request.getProfilePicture() != null)
+        if(request.getProfilePictureUrl() != null)
         {
-            user.setProfilePicture(request.getProfilePicture());
+            user.setProfilePictureUrl(request.getProfilePictureUrl());
         }
     }
 
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .bio(user.getBio())
-                .profilePicture(user.getProfilePicture())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .isPrivate(user.getIsPrivate())
                 .createdAt(user.getCreatedAt())
                 .build();

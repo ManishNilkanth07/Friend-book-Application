@@ -40,7 +40,7 @@ public class User implements UserDetails {
 
     private String bio;
 
-    private String profilePicture;
+    private String profilePictureUrl;
 
     private Boolean isPrivate = false;
 
@@ -53,11 +53,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
-    private List<Message> sentMessages;
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
+    private List<Follower> followers;
 
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
-    private List<Message> receivedMessages;
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL)
+    private List<Follower> followings;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

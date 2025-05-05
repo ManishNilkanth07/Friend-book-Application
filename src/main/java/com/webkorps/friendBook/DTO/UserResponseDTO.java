@@ -13,7 +13,7 @@ public class UserResponseDTO {
     private String username;
     private String email;
     private String bio;
-    private String profilePicture;
+    private String profilePictureUrl;
     private Boolean isPrivate;
     private LocalDateTime createdAt;
 }

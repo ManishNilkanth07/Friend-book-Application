@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -19,9 +21,13 @@ public class Follower {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "follower_id", nullable = false)
     private User follower;
 
     @ManyToOne
-    private User followed;
+    @JoinColumn(name = "following_id", nullable = false)
+    private User following;
+
+    private LocalDateTime followedAt;
 
 }

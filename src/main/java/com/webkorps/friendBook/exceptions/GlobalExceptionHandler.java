@@ -18,6 +18,28 @@ public class GlobalExceptionHandler {
     {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<String > CommentNotFoundExceptionHandler(CommentNotFoundException e)
+    {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String > RuntimeExceptionHandler(RuntimeException e)
+    {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(UserNotAuthenticatedException.class)
+    public ResponseEntity<String > UserNotAuthenticatedExceptionHandler(UserNotAuthenticatedException e)
+    {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(PostNotFoundException.class)
+    public ResponseEntity<String > PostNotFoundExceptionHandler(PostNotFoundException e)
+    {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<String> UserNotFoundExceptionHandler(UserNotFoundException e)

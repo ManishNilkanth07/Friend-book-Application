@@ -3,6 +3,7 @@ package com.webkorps.friendBook.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  
 import java.time.LocalDateTime;
@@ -29,8 +30,11 @@ public class Post {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
+    private LocalDateTime lastUpdatedAt;
+
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)

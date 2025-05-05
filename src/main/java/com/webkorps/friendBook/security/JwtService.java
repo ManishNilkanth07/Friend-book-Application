@@ -46,12 +46,6 @@ public class JwtService {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
-    public String generateRefreshToken(
-            UserDetails userDetails
-    ) {
-        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
-    }
-
     protected String buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,
@@ -67,6 +61,11 @@ public class JwtService {
                 .compact();
     }
 
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
     public String generatePasswordResetToken(User user) {
 
         Map<String, Object> claims = new HashMap<>();
@@ -74,11 +73,6 @@ public class JwtService {
         claims.put("username", user.getUsername());
         claims.put("purpose", "reset-password");
         return buildToken(claims, user, 15 * 60 * 1000);
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
