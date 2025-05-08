@@ -77,7 +77,7 @@ public class AuthServiceImpl implements AuthService{
                 .orElseThrow(()-> new UserNotFoundException(String.format("user not found with username : %d and email : %d",username, email)));
 
         String token = jwtService.generatePasswordResetToken(user);
-        String resetLink = "http://localhost:8081/api/v1/auth/reset-password?token=" + token;
+        String resetLink = "http://localhost:8081/reset-password?token=" + token;
         return emailService.sendPasswordResetEmail(email,resetLink);
 
     }
