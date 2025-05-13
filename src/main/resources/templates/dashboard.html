@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FriendBook - Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #25D366;
+            --secondary-color: #128C7E;
+            --accent-color: #34B7F1;
+            --background-color: #FAFAFA;
+            --card-bg: #FFFFFF;
+            --text-color: #262626;
+            --light-text: #8E8E8E;
+            --border-color: #DBDBDB;
+            --hover-bg: #F5F5F5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .search-bar {
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 5px 15px;
+            width: 100%;
+            max-width: 300px;
+            outline: none;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            margin: 0 10px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .nav-icon:hover {
+            color: var(--primary-color);
+        }
+
+        .profile-pic {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .main-container {
+            max-width: 975px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .stories-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .story {
+            display: inline-block;
+            text-align: center;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .story-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            margin-bottom: 5px;
+        }
+
+        .story-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid white;
+            object-fit: cover;
+        }
+
+        .story-username {
+            font-size: 0.75rem;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60px;
+        }
+
+        .post {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .post-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .post-username {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-right: 5px;
+        }
+
+        .post-more {
+            margin-left: auto;
+            cursor: pointer;
+        }
+
+        .post-image {
+            width: 100%;
+            max-height: 600px;
+            object-fit: cover;
+        }
+
+        .post-actions {
+            padding: 10px 15px;
+        }
+
+        .action-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .action-icon:hover {
+            opacity: 0.7;
+        }
+
+        .post-likes {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin: 5px 15px;
+        }
+
+        .post-caption {
+            margin: 5px 15px;
+            font-size: 0.9rem;
+        }
+
+        .post-comments {
+            color: var(--light-text);
+            font-size: 0.9rem;
+            margin: 5px 15px;
+            cursor: pointer;
+        }
+
+        .post-time {
+            color: var(--light-text);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin: 5px 15px 10px;
+        }
+
+        .add-comment {
+            display: flex;
+            border-top: 1px solid var(--border-color);
+            padding: 15px;
+        }
+
+        .comment-input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+        }
+
+        .post-btn {
+            color: var(--accent-color);
+            font-weight: 600;
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0.5;
+        }
+
+        .post-btn.active {
+            opacity: 1;
+        }
+
+        .suggestions {
+            position: sticky;
+            top: 80px;
+        }
+
+        .suggestion {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .suggestion-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .suggestion-info {
+            flex-grow: 1;
+        }
+
+        .suggestion-username {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .suggestion-text {
+            font-size: 0.8rem;
+            color: var(--light-text);
+            margin: 0;
+        }
+
+        .follow-btn {
+            color: var(--accent-color);
+            font-weight: 600;
+            font-size: 0.8rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .follow-btn.following {
+            color: var(--light-text);
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--light-text);
+            font-size: 0.8rem;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+
+        .footer-links {
+            margin-bottom: 10px;
+        }
+
+        .footer-link {
+            color: var(--light-text);
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .search-result-item:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .search-result-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .search-result-username {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 0 10px;
+            }
+            
+            .stories-container {
+                border-left: none;
+                border-right: none;
+                border-radius: 0;
+            }
+
+            .search-bar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">FriendBook</a>
+            
+            <!-- Search Bar -->
+            <div class="d-none d-md-flex ms-4 position-relative">
+                <input type="text" class="search-bar" placeholder="Search" id="searchInput" autocomplete="off">
+                <div class="search-results" id="searchResults">
+                    <!-- Search results will be populated here -->
+                </div>
+            </div>
+            
+            <!-- Navigation Icons -->
+            <div class="d-flex align-items-center ms-auto">
+                <a href="/dashboard" class="nav-icon"><i class="fas fa-home"></i></a>
+                <a href="/direct/inbox" class="nav-icon"><i class="far fa-paper-plane"></i></a>
+                <a href="/explore" class="nav-icon"><i class="far fa-compass"></i></a>
+                <a href="/activity" class="nav-icon"><i class="far fa-heart"></i></a>
+                <a href="/profile" class="nav-icon">
+                    <img sec:authentication="principal.profilePic" src="https://via.placeholder.com/30" class="profile-pic" alt="Profile">
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="row">
+            <!-- Feed -->
+            <div class="col-lg-8">
+                <!-- Stories -->
+                <div class="stories-container mb-4" id="storiesContainer">
+                    <!-- Stories will be loaded here -->
+                </div>
+
+                <!-- Create Post -->
+                <div class="post mb-4">
+                    <div class="post-header">
+                        <img sec:authentication="principal.profilePic" src="https://via.placeholder.com/32" class="post-avatar" alt="User">
+                        <div class="post-username" sec:authentication="principal.username">username</div>
+                    </div>
+                    <div class="post-content">
+                        <div class="p-3">
+                            <textarea class="form-control mb-2" id="postCaption" rows="3" placeholder="What's on your mind?"></textarea>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary me-2" id="addPhotoBtn"><i class="far fa-image"></i> Photo</button>
+                                    <input type="file" id="postImage" accept="image/*" style="display: none;">
+                                </div>
+                                <button class="btn btn-primary btn-sm" id="createPostBtn" disabled>Post</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Posts -->
+                <div id="postsContainer">
+                    <!-- Posts will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Suggestions -->
+            <div class="col-lg-4 d-none d-lg-block">
+                <div class="suggestions p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex align-items-center">
+                            <img sec:authentication="principal.profilePic" class="rounded-circle me-3" width="56" height="56" id="currentUserPic">
+                            <div>
+                                <div class="fw-bold" id="currentUsername" sec:authentication="principal.username">username</div>
+                                <div class="text-muted small" id="currentFullName" sec:authentication="principal.fullName">Full Name</div>
+                            </div>
+                        </div>
+                        <a href="/profile" class="text-primary text-decoration-none small fw-bold">View Profile</a>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted fw-bold small">Suggestions For You</span>
+                        <a href="/explore/people/suggested/" class="text-dark text-decoration-none small fw-bold">See All</a>
+                    </div>
+
+                    <div id="suggestionsList">
+                        <!-- Suggestions will be loaded here -->
+                    </div>
+
+                    <div class="footer mt-4">
+                        <div class="footer-links">
+                            <a href="/about/" class="footer-link">About</a>
+                            <a href="/help/" class="footer-link">Help</a>
+                            <a href="/privacy/" class="footer-link">Privacy</a>
+                            <a href="/terms/" class="footer-link">Terms</a>
+                        </div>
+                        <div class="text-muted small mt-2">© 2025 FRIENDBOOK</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- JWT Decode -->
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/cjs/index.min.js"></script>
+    
+    <script>
+        // Function to get JWT token from localStorage
+        function getAuthToken() {
+            return localStorage.getItem('jwtToken');
+        }
+
+        // Function to check if user is authenticated
+        function isAuthenticated() {
+            return !!getAuthToken();
+        }
+
+        // Redirect to login if not authenticated
+        if (!isAuthenticated()) {
+            window.location.href = '/login';
+        }
+
+        // Function to get current user from token
+        function getCurrentUser() {
+            const token = getAuthToken();
+            if (!token) return null;
+            
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return {
+                    id: payload.userId || 1,
+                    username: payload.sub || 'johndoe',
+                    fullName: payload.fullName || 'John Doe',
+                    profilePic: payload.profilePic || 'https://via.placeholder.com/150'
+                };
+            } catch (e) {
+                console.error('Error parsing token:', e);
+                return null;
+            }
+        }
+
+        // Function to make authenticated fetch requests
+        async function fetchWithAuth(url, options = {}) {
+            const token = getAuthToken();
+            if (!token) {
+                window.location.href = '/login';
+                return Promise.reject('No authentication token found');
+            }
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...options.headers
+            };
+
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers,
+                    credentials: 'include' // Include cookies if needed
+                });
+
+                if (response.status === 401) {
+                    // Token expired or invalid
+                    localStorage.removeItem('jwtToken');
+                    window.location.href = '/login';
+                    return Promise.reject('Authentication failed');
+                }
+
+                return response;
+            } catch (error) {
+                console.error('API request failed:', error);
+                throw error;
+            }
+        }
+
+        // Make fetchWithAuth available globally
+        window.fetchWithAuth = fetchWithAuth;
+    </script>
+    
+    <!-- Custom JS -->
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>
