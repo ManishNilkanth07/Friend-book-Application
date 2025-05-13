@@ -41,14 +41,14 @@ public class AuthServiceImpl implements AuthService{
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .build();
-
+        User savedUser;
         try{
-            userRepository.save(user);
+            savedUser =  userRepository.save(user);
         }catch (DataIntegrityViolationException e)
         {
             throw new UserExistsWithUsernameException(String.format("user with username : %d is already exists ",request.getUsername()));
         }
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateToken(savedUser);
         return AuthenticationResponse.builder().accessToken(token).build();
     }
 

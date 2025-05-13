@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - FriendBook</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #25D366;
+            --secondary-color: #128C7E;
+            --accent-color: #34B7F1;
+            --background-color: #F5F6F7;
+            --text-color: #1C1E21;
+            --light-text: #65676B;
+            --border-radius: 12px;
+            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-top: 60px;
+        }
+
+        .navbar {
+            background-color: white !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-family: 'Grand Hotel', cursive;
+            font-size: 1.8rem;
+            color: var(--primary-color) !important;
+        }
+
+
+        .profile-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            position: relative;
+        }
+
+        .profile-header {
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+
+        .profile-bio {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .profile-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-tabs {
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .tab-content {
+            padding: 1.5rem 0;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            padding-bottom: 100%;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.2s;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .gallery-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .no-posts {
+            text-align: center;
+            padding: 60px 0;
+            color: var(--secondary-color);
+        }
+
+        .no-posts i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .no-posts h4 {
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .no-posts p {
+            font-size: 0.9rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+   
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">FriendBook</a>
+            <div class="ms-auto d-flex align-items-center">
+                <a href="/" class="btn btn-link text-dark me-2"><i class="fas fa-home fa-lg"></i></a>
+                <a href="/messages" class="btn btn-link text-dark me-2"><i class="far fa-paper-plane fa-lg"></i></a>
+                <a href="/explore" class="btn btn-link text-dark me-2"><i class="far fa-compass fa-lg"></i></a>
+                <a href="/profile" class="btn btn-link text-dark"><i class="far fa-user fa-lg"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center">
+                        <div class="profile-avatar mb-3">
+                            <img src="" alt="Profile Picture" class="profile-image" id="profileImage">
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="d-flex align-items-center mb-3">
+                            <h2 class="mb-0 me-3" id="usernameDisplay">username</h2>
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="editProfileBtn">
+                                <i class="fas fa-user-edit me-1"></i>Edit Profile
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="d-flex gap-4 mb-3">
+                            <div class="text-center">
+                                <div class="fw-bold fs-5" id="postsCount">0</div>
+                                <div class="text-muted small">Posts</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="fw-bold fs-5" id="followersCount">0</div>
+                                <div class="text-muted small">Followers</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="fw-bold fs-5" id="followingCount">0</div>
+                                <div class="text-muted small">Following</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h5 id="fullNameDisplay" class="mb-1">Full Name</h5>
+                            <p class="text-muted mb-2" id="emailDisplay">email@example.com</p>
+                            <p class="mb-0" id="profileBio">
+                                <span id="bioText">No bio yet</span>
+                                <small class="text-muted d-block mt-1" id="accountStatus">
+                                    <i class="fas fa-lock me-1"></i>Private Account
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs justify-content-center border-0 mb-4" id="profileTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button">
+                            <i class="fas fa-th me-2"></i>Posts
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="saved-tab" data-bs-toggle="tab" data-bs-target="#saved" type="button">
+                            <i class="far fa-bookmark me-2"></i>Saved
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tagged-tab" data-bs-toggle="tab" data-bs-target="#tagged" type="button">
+                            <i class="far fa-user me-2"></i>Tagged
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="posts">
+                        <div class="row g-3">
+                            <!-- Posts will be loaded here -->
+                            <div class="col-12 text-center py-5">
+                                <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                                <h4 class="mb-2">No Posts Yet</h4>
+                                <p class="text-muted mb-0">When you share photos and videos, they'll appear on your profile.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="saved">
+                        <div class="col-12 text-center py-5">
+                            <i class="far fa-bookmark fa-3x text-muted mb-3"></i>
+                            <h4 class="mb-2">No Saved Posts</h4>
+                            <p class="text-muted mb-0">Save photos and videos that you want to see again.</p>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="tagged">
+                        <div class="col-12 text-center py-5">
+                            <i class="far fa-user fa-3x text-muted mb-3"></i>
+                            <h4 class="mb-2">No Tagged Photos</h4>
+                            <p class="text-muted mb-0">When people tag you in photos, they'll appear here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title mx-auto">Edit Profile</h5>
+                        <button type="button" class="btn btn-link text-primary text-decoration-none" id="saveProfileBtn" style="visibility: hidden;">
+                            Save
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-body pt-0">
+                    <form id="profileForm" class="needs-validation" novalidate>
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
+                                <img src="" alt="Profile" class="rounded-circle border" id="modalProfileImage" width="100" height="100" style="object-fit: cover; border-width: 2px !important;">
+                                <div class="position-absolute bottom-0 end-0 bg-primary rounded-circle p-2" style="cursor: pointer;" id="uploadImageBtn">
+                                    <i class="fas fa-camera text-white"></i>
+                                    <input type="file" id="profileImageInput" accept="image/*" class="d-none">
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-link text-primary btn-sm" id="changePhotoBtn">
+                                    Change Profile Photo
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label small text-muted mb-1">First Name</label>
+                            <input type="text" class="form-control form-control-sm" id="firstName" name="firstName" required>
+                            <div class="invalid-feedback">
+                                Please provide your first name
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label small text-muted mb-1">Last Name</label>
+                            <input type="text" class="form-control form-control-sm" id="lastName" name="lastName">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label small text-muted mb-1">Username</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">@</span>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                                <div class="invalid-feedback">
+                                    Please choose a username
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label small text-muted mb-1">Email</label>
+                            <input type="email" class="form-control form-control-sm" id="email" name="email" required>
+                            <div class="invalid-feedback">
+                                Please provide a valid email
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="bio" class="form-label small text-muted mb-1">Bio</label>
+                            <textarea class="form-control form-control-sm" id="bio" name="bio" rows="3" maxlength="150" placeholder="Tell us about yourself..."></textarea>
+                            <div class="form-text text-end">
+                                <span id="bioCharCount">0</span>/150
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="profilePictureUrl" class="form-label small text-muted mb-1">Profile Picture URL</label>
+                            <div class="input-group input-group-sm">
+                                <input type="url" class="form-control" id="profilePictureUrl" name="profilePictureUrl" placeholder="https://example.com/image.jpg">
+                                <button class="btn btn-outline-secondary" type="button" id="previewImageBtn" title="Preview image">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Paste a direct image URL or upload a photo</div>
+                        </div>
+                        
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" id="isPrivate" name="isPrivate">
+                            <label class="form-check-label" for="isPrivate">
+                                <span class="fw-medium">Private Account</span>
+                                <div class="form-text">When your account is private, only people you approve can see your posts and follow you.</div>
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" id="submitProfileBtn">
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                Save Changes
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize modals
+            const editProfileModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+            const profileForm = document.getElementById('profileForm');
+            
+            // Event listeners
+            document.getElementById('editProfileBtn').addEventListener('click', () => editProfileModal.show());
+            document.getElementById('changePhotoBtn').addEventListener('click', () => document.getElementById('profileImageInput').click());
+            document.getElementById('uploadImageBtn').addEventListener('click', () => document.getElementById('profileImageInput').click());
+            
+            // Profile image upload handler
+            const profileImageInput = document.getElementById('profileImageInput');
+            profileImageInput.addEventListener('change', handleImageUpload);
+            
+            // Bio character counter
+            const bioInput = document.getElementById('bio');
+            const bioCharCount = document.getElementById('bioCharCount');
+            bioInput.addEventListener('input', function() {
+                bioCharCount.textContent = this.value.length;
+                toggleSaveButton();
+            });
+            
+            // Preview image button
+            document.getElementById('previewImageBtn').addEventListener('click', function() {
+                const url = document.getElementById('profilePictureUrl').value.trim();
+                if (url) {
+                    const img = document.getElementById('modalProfileImage');
+                    img.src = url;
+                    img.onerror = function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Could not load image from the provided URL'
+                        });
+                    };
+                }
+            });
+            
+            // Toggle save button when form changes
+            const formInputs = profileForm.querySelectorAll('input, textarea, select');
+            formInputs.forEach(input => {
+                input.addEventListener('input', toggleSaveButton);
+                input.addEventListener('change', toggleSaveButton);
+            });
+            
+            // Form submission handler
+            profileForm.addEventListener('submit', saveProfileChanges);
+            
+            // Load user data
+            loadUserProfile();
+            
+            // Function to toggle save button state
+            function toggleSaveButton() {
+                const saveBtn = document.getElementById('saveProfileBtn');
+                if (saveBtn) {
+                    saveBtn.style.visibility = 'visible';
+                }
+            }
+            
+            // Enable form validation
+            (function() {
+                'use strict';
+                
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                const forms = document.querySelectorAll('.needs-validation');
+                
+                // Loop over them and prevent submission
+                Array.from(forms).forEach(form => {
+                    form.addEventListener('submit', event => {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            })();
+        });
+        
+        // Parse JWT token
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                console.error('Error parsing JWT:', e);
+                return null;
+            }
+        }
+        
+        // Get user ID from token
+        function getUserIdFromToken() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return null;
+            }
+            const decoded = parseJwt(token);
+            return decoded?.userId || null;
+        }
+        
+        // Load user profile data
+        async function loadUserProfile() {
+            const userId = getUserIdFromToken();
+            if (!userId) return;
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/v1/user/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch profile');
+                
+                const userData = await response.json();
+                updateProfileUI(userData);
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load profile. Please try again.'
+                });
+            }
+        }
+        
+        // Update UI with user data
+        function updateProfileUI(userData) {
+            if (!userData) return;
+            
+            // Update profile header
+            const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'User';
+            const username = userData.username || 'user';
+            
+            // Update profile image
+            const profileImage = document.getElementById('profileImage');
+            const modalProfileImage = document.getElementById('modalProfileImage');
+            
+            // Set profile image with fallback
+            const updateProfileImage = (url) => {
+                if (url) {
+                    profileImage.src = url;
+                    if (modalProfileImage) modalProfileImage.src = url;
+                    
+                    profileImage.onerror = function() {
+                        const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random`;
+                        this.src = fallbackUrl;
+                        if (modalProfileImage) modalProfileImage.src = fallbackUrl;
+                    };
+                } else {
+                    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random`;
+                    profileImage.src = avatarUrl;
+                    if (modalProfileImage) modalProfileImage.src = avatarUrl;
+                }
+            };
+            
+            updateProfileImage(userData.profilePictureUrl);
+            
+            // Helper function to safely set text content
+            const setTextContent = (id, text, fallback = '') => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = text || fallback;
+                    element.style.display = (text || fallback) ? '' : 'none';
+                }
+            };
+
+            // Update profile info
+            setTextContent('usernameDisplay', `@${username}`);
+            setTextContent('fullNameDisplay', fullName);
+            setTextContent('emailDisplay', userData.email || '');
+            
+            // Update bio with proper handling
+            const bioElement = document.getElementById('bioText');
+            if (bioElement) {
+                bioElement.textContent = userData?.bio || 'No bio yet';
+                bioElement.style.fontStyle = userData?.bio ? 'normal' : 'italic';
+            }
+            
+            // Update account status
+            const accountStatus = document.getElementById('accountStatus');
+            if (accountStatus) {
+                accountStatus.innerHTML = userData?.isPrivate 
+                    ? '<i class="fas fa-lock me-1"></i>Private Account'
+                    : '<i class="fas fa-globe-americas me-1"></i>Public Account';
+            }
+            
+            // Helper function to safely set input values
+            const setInputValue = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) element.value = value || '';
+            };
+            
+            // Update form fields in modal
+            setInputValue('firstName', userData?.firstName);
+            setInputValue('lastName', userData?.lastName);
+            setInputValue('username', username);
+            setInputValue('email', userData?.email);
+            setInputValue('bio', userData?.bio);
+            setInputValue('profilePictureUrl', userData?.profilePictureUrl);
+            
+            const isPrivateCheckbox = document.getElementById('isPrivate');
+            if (isPrivateCheckbox) {
+                isPrivateCheckbox.checked = !!userData?.isPrivate;
+            }
+            
+            // Update stats (placeholder values - replace with actual data from your API)
+            setTextContent('postsCount', '0');
+            setTextContent('followersCount', '0');
+            setTextContent('followingCount', '0');
+        }
+        
+        // Handle profile image upload
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('modalProfileImage');
+                img.src = e.target.result;
+                
+                // Here you would typically upload the image to your server
+                // and update the user's profile picture URL
+                // uploadProfileImage(file);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Save profile changes
+        async function saveProfileChanges(event) {
+            event.preventDefault();
+            
+            const userId = getUserIdFromToken();
+            if (!userId) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            // Get form elements
+            const form = document.getElementById('profileForm');
+            const submitBtn = document.getElementById('submitProfileBtn');
+            const spinner = submitBtn.querySelector('.spinner-border');
+            
+            // Check form validity
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                form.reportValidity();
+                return;
+            }
+            
+            // Prepare form data
+            const formData = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                bio: document.getElementById('bio').value.trim(),
+                profilePictureUrl: document.getElementById('profilePictureUrl').value.trim(),
+                isPrivate: document.getElementById('isPrivate').checked
+            };
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            spinner.classList.remove('d-none');
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/v1/user/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to update profile');
+                }
+                
+                // Update UI with new data
+                updateProfileUI(data);
+                
+                // Hide save button after successful save
+                const saveBtn = document.getElementById('saveProfileBtn');
+                if (saveBtn) saveBtn.style.visibility = 'hidden';
+                
+                // Show success message
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Profile Updated',
+                    text: 'Your changes have been saved successfully!',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+                
+                // Close the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+                modal.hide();
+                
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Update Failed',
+                    text: error.message || 'Failed to update profile. Please try again.',
+                    confirmButtonText: 'OK'
+                });
+                
+            } finally {
+                // Reset loading state
+                submitBtn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        }
+    </script>
+</body>
+</html>

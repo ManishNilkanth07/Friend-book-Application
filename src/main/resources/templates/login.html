@@ -6,11 +6,11 @@
     <title>Login - FriendBook</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- SweetAlert2 -->
+
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
+
     <style>
         :root {
             --primary-color: #25D366;
@@ -269,16 +269,6 @@
                 </div>
             </div>
 
-            <div class="social-login">
-                <button type="button" class="social-btn" onclick="window.location.href='/auth/google'">
-                    <i class="fab fa-google social-icon"></i>
-                    Continue with Google
-                </button>
-                <button type="button" class="social-btn" onclick="window.location.href='/auth/facebook'">
-                    <i class="fab fa-facebook-f social-icon"></i>
-                    Continue with Facebook
-                </button>
-            </div>
         </form>
 
         <div class="auth-footer">
@@ -291,27 +281,19 @@
                     Back to Home
                 </a>
             </div>
-            <div class="text-center">
-                <a href="/about" class="text-decoration-none text-muted me-3">About</a>
-                <a href="/privacy" class="text-decoration-none text-muted">Privacy Policy</a>
-            </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.all.min.js"></script>
     <script>
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             const loginBtn = document.getElementById('loginBtn');
             const loadingSpinner = document.getElementById('loadingSpinner');
-            
-            // Get form data
+
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Show loading
             loginBtn.disabled = true;
             loadingSpinner.style.display = 'block';
 
@@ -330,30 +312,26 @@
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Login failed');
+                    throw new Error('Login failed');
                 }
+                console.log("token is:",data.access_token)
+                localStorage.setItem('token', data.access_token);
 
-                // Store JWT token in localStorage
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('username', username);
-
-                // Show success message
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
                     text: 'Login successful!',
-                    confirmButtonText: 'Go to Dashboard'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Redirect to dashboard or home page
-                        window.location.href = '/';
-                    }
+                    confirmButtonText: 'Go to Profile',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                }).then(() => {
+                    window.location.href = '/profile';
                 });
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.message,
+                    text: "Login failed",
                     confirmButtonText: 'Try Again'
                 });
             } finally {
@@ -362,7 +340,6 @@
             }
         });
 
-        // Show success message if present in URL
         const urlParams = new URLSearchParams(window.location.search);
         const successMessage = urlParams.get('success');
         if (successMessage) {
@@ -374,12 +351,10 @@
             });
         }
 
-        // Remember me functionality
         const rememberMe = document.getElementById('rememberMe');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
 
-        // Load saved credentials
         if (localStorage.getItem('rememberMe') === 'true') {
             rememberMe.checked = true;
             usernameInput.value = localStorage.getItem('username');
@@ -398,7 +373,6 @@
             }
         });
 
-        // Handle forgot password
         document.getElementById('forgotPassword').addEventListener('click', () => {
             const email = prompt('Please enter your email address:');
             if (email) {
