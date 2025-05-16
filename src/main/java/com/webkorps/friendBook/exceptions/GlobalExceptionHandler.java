@@ -18,6 +18,11 @@ public class GlobalExceptionHandler {
     {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
+    @ExceptionHandler(FileStoreException.class)
+    public ResponseEntity<String > FileStoreExceptionHandler(FileStoreException e)
+    {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     @ExceptionHandler(CommentNotFoundException.class)
     public ResponseEntity<String > CommentNotFoundExceptionHandler(CommentNotFoundException e)
     {

@@ -42,7 +42,9 @@ public class SecurityConfiguration {
                     "/signup",
                     "/about",
                     "/privacy",
-                    "/profile"
+                    "/profile",
+                    "/dashboard",
+                    "/images/**"
             };
 
     @Bean

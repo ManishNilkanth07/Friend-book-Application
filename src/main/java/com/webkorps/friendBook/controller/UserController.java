@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -43,5 +44,12 @@ public class UserController {
     @Operation(summary = "Search user by username keyword", description = "Returns the List of users similar to keyword")
     public ResponseEntity<List<UserResponseDTO>> search(@RequestParam String keyword) {
         return ResponseEntity.ok(userService.searchUsers(keyword));
+    }
+
+    @PostMapping("/{userId}/uploadProfilePhoto")
+    @Operation(summary = "upload profile Photo by user Id", description = "Returns the String message")
+    public ResponseEntity<String> uploadProfilePhoto(@PathVariable Long userId, @RequestParam("file") MultipartFile file)
+    {
+        return ResponseEntity.ok(userService.updateProfilePhoto(userId,file));
     }
 }

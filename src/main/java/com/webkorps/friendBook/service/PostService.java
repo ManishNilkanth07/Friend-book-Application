@@ -1,6 +1,7 @@
 package com.webkorps.friendBook.service;
 
 import com.webkorps.friendBook.DTO.PostDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface PostService {
 
     List<PostDto> getPostsByUser(String username);
 
+    String uploadPostImage(Long postId, MultipartFile file);
+
+    List<PostDto> getAllPosts();
 }

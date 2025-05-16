@@ -1,10 +1,7 @@
 package com.webkorps.friendBook.service.ServiceImpl;
 
 import com.webkorps.friendBook.DTO.PostDto;
-import com.webkorps.friendBook.exceptions.PostNotFoundException;
-import com.webkorps.friendBook.exceptions.UserNotAuthenticatedException;
-import com.webkorps.friendBook.exceptions.UserNotAuthorizedException;
-import com.webkorps.friendBook.exceptions.UserNotFoundException;
+import com.webkorps.friendBook.exceptions.*;
 import com.webkorps.friendBook.model.Post;
 import com.webkorps.friendBook.model.User;
 import com.webkorps.friendBook.repository.PostRepository;
@@ -12,10 +9,19 @@ import com.webkorps.friendBook.repository.UserRepository;
 import com.webkorps.friendBook.service.PostService;
 import com.webkorps.friendBook.utils.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -109,6 +115,44 @@ public class PostServiceImpl implements PostService {
 
     }
 
+    @Override
+    public String uploadPostImage(Long postId, MultipartFile file) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(()-> new PostNotFoundException(String.format("Post not found with post Id : %d",postId)));
+
+        if (file.isEmpty()) {
+            return "File is empty";
+        }
+        try {
+            String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String fileName = "post_" + postId + "_" + System.currentTimeMillis() + fileExtension;
+
+            Path uploadPath = Paths.get("src/main/resources/static/images/uploads/post-images/");
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            String postPhotoUrl = "images/uploads/post-images/" + fileName;
+
+            post.setImageUrl(postPhotoUrl);
+            postRepository.save(post);
+            return "Post image uploaded successfully: " + postPhotoUrl;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new FileStoreException("Failed to upload post image");
+        }
+    }
+
+    @Override
+    public List<PostDto> getAllPosts() {
+        List<Post> posts = postRepository.findAll();
+        return posts.stream().map(this::mapToPostDto).toList();
+    }
 
 
     public PostDto mapToPostDto(Post post)

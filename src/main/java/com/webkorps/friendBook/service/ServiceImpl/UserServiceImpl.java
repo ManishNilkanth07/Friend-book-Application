@@ -2,13 +2,20 @@ package com.webkorps.friendBook.service.ServiceImpl;
 
 import com.webkorps.friendBook.DTO.UserUpdateRequest;
 import com.webkorps.friendBook.DTO.UserResponseDTO;
+import com.webkorps.friendBook.exceptions.FileStoreException;
 import com.webkorps.friendBook.exceptions.UserNotFoundException;
 import com.webkorps.friendBook.model.User;
 import com.webkorps.friendBook.repository.UserRepository;
 import com.webkorps.friendBook.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 
@@ -78,6 +85,41 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException(String.format("User not found with given user Id: %d", userId));
         }
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public String updateProfilePhoto(Long userId, MultipartFile file) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(()-> new UserNotFoundException(String.format("User not found with given user Id: %d", userId)));
+
+            if (file.isEmpty()) {
+                return "File is empty";
+            }
+
+            String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String fileName = "user_" + userId + "_" + System.currentTimeMillis() + fileExtension;
+
+
+            Path uploadPath = Paths.get("src/main/resources/static/images/uploads/profile_pictures/");
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            String profilePhotoUrl = "images/uploads/profile_pictures/" + fileName;
+
+            user.setProfilePictureUrl(profilePhotoUrl);
+            userRepository.save(user);
+            return "Profile photo uploaded successfully: " + profilePhotoUrl;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new FileStoreException("Failed to upload profile photo");
+        }
     }
 
     private UserResponseDTO mapToDTO(User user) {
