@@ -314,7 +314,6 @@
         <div class="ms-auto d-flex align-items-center">
             <a href="/dashboard" class="btn btn-link text-dark me-2"><i class="fas fa-home fa-lg"></i></a>
             <a href="#" class="btn btn-link text-dark me-2" id="createPostNavBtn"><i class="far fa-plus-square fa-lg"></i></a>
-            <a href="/explore" class="btn btn-link text-dark me-2"><i class="far fa-compass fa-lg"></i></a>
             <a href="/profile" class="btn btn-link text-dark"><i class="far fa-user fa-lg"></i></a>
         </div>
     </div>
@@ -351,9 +350,6 @@
                 <div class="post-actions p-3">
                     <div class="d-flex mb-2">
                         <i class="far fa-heart post-action" id="modalLikeButton"></i>
-                        <i class="far fa-comment post-action ms-3"></i>
-                        <i class="far fa-paper-plane post-action ms-3"></i>
-                        <i class="far fa-bookmark post-action ms-auto"></i>
                     </div>
                     <div class="post-likes" id="modalPostLikes">0 likes</div>
                     <div class="post-caption mb-2">
@@ -590,9 +586,9 @@
             postElement.className = 'post-container mb-4';
             postElement.innerHTML = `
                 <div class="post-header">
-                    <img src="${post.user?.profilePictureUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user?.username || 'User')}&background=random`}"
-                         alt="${post.user?.username || 'User'}" class="post-user-avatar">
-                    <div class="post-username">${post.user?.username || 'User'}</div>
+                    <img src="${post.profilePictureUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.username || 'User')}&background=random`}"
+                         alt="${post.username || 'User'}" class="post-user-avatar">
+                    <div class="post-username">${post.username || 'User'}</div>
                     <div class="post-more">
                         <i class="fas fa-ellipsis-h"></i>
                     </div>
@@ -602,12 +598,10 @@
                     <i class="far fa-heart post-action ${post.likedByCurrentUser ? 'active' : ''}"
                        data-post-id="${post.id}" id="likeButton-${post.id}"></i>
                     <i class="far fa-comment post-action" data-post-id="${post.id}"></i>
-                    <i class="far fa-paper-plane post-action"></i>
-                    <i class="far fa-bookmark post-action float-end"></i>
                 </div>
                 <div class="post-likes" id="likeCount-${post.id}">${post.likeCount || 0} likes</div>
                 <div class="post-caption">
-                    <span class="post-caption-username">${post.user?.username || 'User'}</span>
+                    <span class="post-caption-username">${post.username || 'User'}</span>
                     ${post.caption || ''}
                 </div>
                 <div class="post-comments" id="commentsSection-${post.id}" data-post-id="${post.id}">
