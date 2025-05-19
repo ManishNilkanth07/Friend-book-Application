@@ -6,7 +6,9 @@ import lombok.Data;
 
 @Data
 public class CommentRequest {
+    @NotNull(message = "Post ID is required")
     private Long postId;
 
+    @NotBlank(message = "Comment text cannot be empty")
     private String comment;
 }

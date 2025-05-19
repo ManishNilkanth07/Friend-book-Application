@@ -130,7 +130,6 @@
             margin-bottom: 8px;
             font-size: 14px;
             color: var(--light-text);
-            cursor: pointer;
         }
 
         .post-time {
@@ -273,6 +272,31 @@
 
         .btn-loading .spinner-border {
             display: inline-block;
+        }
+
+        /* New styles for comments */
+        .post-comment {
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .comment-username {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .comment-text {
+            word-break: break-word;
+        }
+
+        .view-all-comments {
+            color: var(--light-text);
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .view-all-comments:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -526,6 +550,21 @@
         `;
     }
 
+    // Helper function to render comment previews
+    function renderPostCommentsPreview(comments) {
+        if (!comments || comments.length === 0) return '';
+
+        // Show only the last 2 comments
+        const commentsToShow = comments.slice(-2);
+
+        return commentsToShow.map(comment => `
+            <div class="post-comment">
+                <span class="comment-username">${comment.user?.username || 'User'}</span>
+                <span class="comment-text">${comment.content}</span>
+            </div>
+        `).join('');
+    }
+
     // Render posts
     function renderPosts(posts) {
         const postsContainer = document.getElementById('postsContainer');
@@ -571,7 +610,10 @@
                     <span class="post-caption-username">${post.user?.username || 'User'}</span>
                     ${post.caption || ''}
                 </div>
-                <div class="post-comments">View all ${post.commentCount || 0} comments</div>
+                <div class="post-comments" id="commentsSection-${post.id}" data-post-id="${post.id}">
+                    ${renderPostCommentsPreview(post.comments || [])}
+                    ${post.commentCount > 2 ? `<div class="view-all-comments" data-post-id="${post.id}">View all ${post.commentCount} comments</div>` : ''}
+                </div>
                 <div class="post-time">${formatPostTime(post.createdAt)}</div>
                 <div class="post-comment-form">
                     <input type="text" class="post-comment-input" placeholder="Add a comment..."
@@ -605,6 +647,23 @@
                 if (post.user?.id) {
                     window.location.href = `/profile/${post.user.id}`;
                 }
+            });
+
+            // Add click event to view all comments
+            const viewAllComments = postElement.querySelector('.view-all-comments');
+            if (viewAllComments) {
+                viewAllComments.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openPostModal(post);
+                });
+            }
+
+            // Add click event to comments section
+            const commentsSection = postElement.querySelector(`#commentsSection-${post.id}`);
+            commentsSection.addEventListener('click', (e) => {
+                if (e.target.classList.contains('view-all-comments')) return;
+                e.stopPropagation();
+                openPostModal(post);
             });
 
             postsContainer.appendChild(postElement);
@@ -702,8 +761,8 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    postId,
-                    content: commentText
+                    postId: Number(postId),
+                    comment: commentText
                 })
             });
 
@@ -719,18 +778,16 @@
             commentInput.value = '';
             document.getElementById(`commentButton-${postId}`).classList.remove('active');
 
+            // Update comments everywhere
+            loadPostComments(postId, false); // Update post comments
+            loadPostComments(postId, true);  // Update modal comments if open
+
             // Update comment count
             const commentsElement = document.querySelector(`#commentButton-${postId}`).closest('.post-container').querySelector('.post-comments');
             const currentText = commentsElement.textContent;
             const match = currentText.match(/View all (\d+) comments/);
             const currentCount = match ? parseInt(match[1]) : 0;
             commentsElement.textContent = `View all ${currentCount + 1} comments`;
-
-            // If post modal is open for this post, add the new comment
-            const modalPostId = document.getElementById('modalPostImage')?.getAttribute('data-post-id');
-            if (modalPostId && modalPostId == postId) {
-                loadPostComments(postId);
-            }
         } catch (error) {
             console.error('Error adding comment:', error);
             Swal.fire({
@@ -739,6 +796,123 @@
                 text: error.message || 'Failed to add comment. Please try again.'
             });
         }
+    }
+
+    // Load post comments
+    async function loadPostComments(postId, forModal = true) {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/v1/comment/${postId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to load comments');
+            }
+
+            const comments = await response.json();
+
+            if (forModal) {
+                renderPostComments(comments);
+            } else {
+                // Update the post's comments section
+                const commentsSection = document.getElementById(`commentsSection-${postId}`);
+                if (commentsSection) {
+                    commentsSection.innerHTML = renderPostCommentsPreview(comments);
+                    if (comments.length > 2) {
+                        commentsSection.innerHTML += `<div class="view-all-comments" data-post-id="${postId}">View all ${comments.length} comments</div>`;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error loading comments:', error);
+        }
+    }
+
+    // Render post comments in modal
+    function renderPostComments(comments) {
+        const commentsContainer = document.getElementById('modalPostComments');
+        if (!commentsContainer) return;
+
+        commentsContainer.innerHTML = '';
+
+        if (comments.length === 0) {
+            commentsContainer.innerHTML = '<div class="text-muted text-center py-3">No comments yet</div>';
+            return;
+        }
+
+        comments.forEach(comment => {
+            const commentElement = document.createElement('div');
+            commentElement.className = 'mb-3';
+            commentElement.innerHTML = `
+                <div class="d-flex">
+                    <img src="${comment.user?.profilePictureUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.user?.username || 'User')}&background=random`}"
+                         alt="${comment.user?.username || 'User'}" class="search-result-avatar">
+                    <div class="ms-2">
+                        <div class="search-result-username">${comment.user?.username || 'User'}</div>
+                        <div>${comment.comment}</div>
+                        <div class="text-muted small">${formatPostTime(comment.createdAt)}</div>
+                    </div>
+                </div>
+            `;
+            commentsContainer.appendChild(commentElement);
+        });
+    }
+
+    // Open post modal
+    function openPostModal(post) {
+        const modalPostImage = document.getElementById('modalPostImage');
+        const modalPostLikes = document.getElementById('modalPostLikes');
+        const modalPostCaptionUsername = document.getElementById('modalPostCaptionUsername');
+        const modalPostCaption = document.getElementById('modalPostCaption');
+        const modalPostTime = document.getElementById('modalPostTime');
+        const modalLikeButton = document.getElementById('modalLikeButton');
+        const modalCommentInput = document.getElementById('modalCommentInput');
+        const modalCommentButton = document.getElementById('modalCommentButton');
+
+        // Set post data
+        modalPostImage.src = post.imageUrl || 'https://via.placeholder.com/600';
+        modalPostImage.setAttribute('data-post-id', post.id);
+        modalPostLikes.textContent = `${post.likeCount || 0} likes`;
+        modalPostCaptionUsername.textContent = post.user?.username || 'User';
+        modalPostCaption.textContent = post.caption || '';
+        modalPostTime.textContent = formatPostTime(post.createdAt);
+        modalLikeButton.className = `far fa-heart post-action ${post.likedByCurrentUser ? 'active' : ''}`;
+        modalLikeButton.setAttribute('data-post-id', post.id);
+
+        // Clear comment input
+        modalCommentInput.value = '';
+        modalCommentButton.classList.remove('active');
+
+        // Load comments
+        loadPostComments(post.id);
+
+        // Add event listeners
+        modalLikeButton.onclick = () => {
+            toggleLike(post.id);
+            modalLikeButton.classList.toggle('active');
+
+            // Update like count
+            const currentLikes = parseInt(modalPostLikes.textContent.split(' ')[0]);
+            modalPostLikes.textContent = `${modalLikeButton.classList.contains('active') ? currentLikes + 1 : currentLikes - 1} likes`;
+        };
+
+        modalCommentButton.onclick = () => {
+            addComment(post.id, modalCommentInput.value.trim());
+            modalCommentInput.value = '';
+            modalCommentButton.classList.remove('active');
+        };
+
+        modalCommentInput.addEventListener('input', function() {
+            modalCommentButton.classList.toggle('active', this.value.trim().length > 0);
+        });
+
+        // Show modal
+        bootstrap.Modal.getInstance(document.getElementById('postModal')).show();
     }
 
     // Setup search functionality
@@ -804,111 +978,6 @@
             });
 
             container.appendChild(resultItem);
-        });
-    }
-
-    // Open post modal
-    function openPostModal(post) {
-        const modalPostImage = document.getElementById('modalPostImage');
-        const modalPostLikes = document.getElementById('modalPostLikes');
-        const modalPostCaptionUsername = document.getElementById('modalPostCaptionUsername');
-        const modalPostCaption = document.getElementById('modalPostCaption');
-        const modalPostTime = document.getElementById('modalPostTime');
-        const modalLikeButton = document.getElementById('modalLikeButton');
-        const modalCommentInput = document.getElementById('modalCommentInput');
-        const modalCommentButton = document.getElementById('modalCommentButton');
-
-        // Set post data
-        modalPostImage.src = post.imageUrl || 'https://via.placeholder.com/600';
-        modalPostImage.setAttribute('data-post-id', post.id);
-        modalPostLikes.textContent = `${post.likeCount || 0} likes`;
-        modalPostCaptionUsername.textContent = post.user?.username || 'User';
-        modalPostCaption.textContent = post.caption || '';
-        modalPostTime.textContent = formatPostTime(post.createdAt);
-        modalLikeButton.className = `far fa-heart post-action ${post.likedByCurrentUser ? 'active' : ''}`;
-        modalLikeButton.setAttribute('data-post-id', post.id);
-
-        // Clear comment input
-        modalCommentInput.value = '';
-        modalCommentButton.classList.remove('active');
-
-        // Load comments
-        loadPostComments(post.id);
-
-        // Add event listeners
-        modalLikeButton.onclick = () => {
-            toggleLike(post.id);
-            modalLikeButton.classList.toggle('active');
-
-            // Update like count
-            const currentLikes = parseInt(modalPostLikes.textContent.split(' ')[0]);
-            modalPostLikes.textContent = `${modalLikeButton.classList.contains('active') ? currentLikes + 1 : currentLikes - 1} likes`;
-        };
-
-        modalCommentButton.onclick = () => {
-            addComment(post.id, modalCommentInput.value.trim());
-            modalCommentInput.value = '';
-            modalCommentButton.classList.remove('active');
-        };
-
-        modalCommentInput.addEventListener('input', function() {
-            modalCommentButton.classList.toggle('active', this.value.trim().length > 0);
-        });
-
-        // Show modal
-        bootstrap.Modal.getInstance(document.getElementById('postModal')).show();
-    }
-
-    // Load post comments for modal
-    async function loadPostComments(postId) {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`/api/v1/comment/${postId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to load comments');
-            }
-
-            const comments = await response.json();
-            renderPostComments(comments);
-        } catch (error) {
-            console.error('Error loading comments:', error);
-        }
-    }
-
-    // Render post comments in modal
-    function renderPostComments(comments) {
-        const commentsContainer = document.getElementById('modalPostComments');
-        if (!commentsContainer) return;
-
-        commentsContainer.innerHTML = '';
-
-        if (comments.length === 0) {
-            commentsContainer.innerHTML = '<div class="text-muted text-center py-3">No comments yet</div>';
-            return;
-        }
-
-        comments.forEach(comment => {
-            const commentElement = document.createElement('div');
-            commentElement.className = 'mb-3';
-            commentElement.innerHTML = `
-                <div class="d-flex">
-                    <img src="${comment.user?.profilePictureUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.user?.username || 'User')}&background=random`}"
-                         alt="${comment.user?.username || 'User'}" class="search-result-avatar">
-                    <div class="ms-2">
-                        <div class="search-result-username">${comment.user?.username || 'User'}</div>
-                        <div>${comment.content}</div>
-                        <div class="text-muted small">${formatPostTime(comment.createdAt)}</div>
-                    </div>
-                </div>
-            `;
-            commentsContainer.appendChild(commentElement);
         });
     }
 

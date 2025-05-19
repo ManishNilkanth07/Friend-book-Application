@@ -24,7 +24,7 @@ public class CommentController {
 
     @PostMapping("/add")
     @Operation(summary = "Add comment on post", description = "Returns CommentDto as response")
-    public ResponseEntity<CommentDto> addComment(@RequestBody CommentRequest request)
+    public ResponseEntity<CommentDto> addComment(@Valid @RequestBody CommentRequest request)
     {
 
         CommentDto commentDto1 = commentService.addComment(request);
